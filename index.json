@@ -1,0 +1,16 @@
+﻿[
+	{
+		"name": "davinci-to-ftp",
+		"version": "0.0.1",
+		"description": "Kopiert bei Veränderung eine DAVINCI-Plandatei sowie die DAVINCI-Benutzerdatei in ein FTP-Verzeichnis",
+		"archive": "davinci-to-ftp.cswx",
+		"author": "STÜBER SYSTEMS"
+	},
+	{
+		"name": "davinci-restart-server",
+		"version": "0.0.1",
+		"description": "Startet bei Veränderung der DAVINCI-Benutzerdatei den DAVINCI-Serverdienst neu",
+		"archive": "davinci-restart-server.cswx",
+		"author": "STÜBER SYSTEMS"
+	}
+]

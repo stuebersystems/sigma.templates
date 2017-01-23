@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?><Storage><Version>1</Version><Description>Startet bei Veränderung der DAVINCI-Benutzerdatei den DAVINCI-Serverdienst neu</Description><Notes>*** WICHTIG ***
+
+Sie müssen den Arbeitsbereich Ihres DAVINCI SERVER unter "Ordner" definieren. Der Name muss "davinci-srv" lauten.</Notes><Script>var
+	SrvStorage: TLocalStorage;
+	Console: TConsole;
+	DavUserFile: TStringParameter;
+begin
+
+	DavUserFile := Session.Parameters.ItemsByName['davUserFile'] as TStringParameter;
+
+	SrvStorage := Session.Storages.ItemsByName['davinci-srv'] as TLocalStorage;
+
+  if FileSystem.GetLastWriteTime(SrvStorage.FolderName + '\' + DavUserFile.Value) &gt; Session.LastSuccessfulStart then
+  begin
+    try
+      Console := Session.CreateConsole;
+      try
+			  Console.CommandLine := 'net stop daVinciServerService';
+				Console.Execute;
+			  Console.CommandLine := 'net start daVinciServerService';
+				Console.Execute;
+      finally
+        Console.Free;
+      end;
+    except
+      RaiseException(erCustomError, ExceptionParam);
+    end;
+  end else Session.Abort;
+	
+end.
+</Script><Parameters><Items><Item Class="String" ID="{1467787A-7E9E-470F-8A1E-347004C85977}"><Name>davUserFile</Name><Description>Name der DAVINCI User Datei</Description><Value>daVinci.users</Value></Item></Items></Parameters><Triggers><Items><Item Class="DailyTrigger" ID="{42C820F9-847D-4C90-A664-56E17994D0FE}"><Enabled>0</Enabled><StartTimePoint>2017-01-01</StartTimePoint><Repetition>1</Repetition><RepetitionInterval>10000</RepetitionInterval><RepetitionDuration>86400000</RepetitionDuration></Item></Items></Triggers></Storage>

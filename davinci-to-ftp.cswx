@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?><Storage><Version>1</Version><Description>Kopiert bei Veränderung eine DAVINCI-Plandatei sowie die DAVINCI-Benutzerdatei in ein FTP-Verzeichnis</Description><Notes>*** WICHTIG ***
+
+Sie müssen den Arbeitsbereich Ihres DAVINCI SERVER sowie die FTP-Verbindung unter "Ordner" definieren. Der Name für den Arbeitsberich muss "davinci-srv" lauten, der Name für die FTP-Verbidnung "davinci-ftp".</Notes><Script>var
+  FtpClient: TFtpClient;
+	FtpStorage: TFtpStorage;
+	SrvStorage: TLocalStorage;
+	DavDataFile: TStringParameter;
+	DavUserFile: TStringParameter;
+begin
+
+	DavDataFile := Session.Parameters.ItemsByName['davDataFile'] as TStringParameter;
+	DavUserFile := Session.Parameters.ItemsByName['davUserFile'] as TStringParameter;
+
+  FtpStorage := Session.Storages.ItemsByName['davinci-ftp'] as TFtpStorage;
+	SrvStorage := Session.Storages.ItemsByName['davinci-srv'] as TLocalStorage;
+
+  if FileSystem.GetLastWriteTime(SrvStorage.FolderName + '\' + DavDataFile.Value) &gt; Session.LastSuccessfulStart then
+  begin
+    try
+
+      FileSystem.CopyFile(SrvStorage.FolderName + '\' + DavDataFile.Value, SrvStorage.FolderName + '\' + DavDataFile.Value + '.tmp', true);
+
+      FtpClient := Session.CreateFtpClient;
+      try
+        FtpClient.HostName := FtpStorage.HostName;
+        FtpClient.Port := FtpStorage.Port;
+        FtpClient.PassiveMode := FtpStorage.PassiveMode;
+        FtpClient.TlsMode := FtpStorage.TlsMode; 
+        FtpClient.UserName := FtpStorage.UserName;
+        FtpClient.Password := FtpStorage.Password; 
+        FtpClient.Open;
+        FtpClient.Login;
+        FtpClient.ChangeDirectory(FtpStorage.FolderName);
+        FtpClient.UploadFile(SrvStorage.FolderName + '\' + DavDataFile.Value + '.tmp', DavDataFile.Value);
+        FtpClient.Close;
+      finally
+        FtpClient.Free;
+      end;
+
+      FileSystem.DeleteFile(SrvStorage.FolderName + '\' + DavDataFile.Value + '.tmp', true);
+
+    except
+      if (Session.LastErrorContext = ecFileSystem) and (Session.LastErrorCode = 2) then
+        Session.Abort
+      else
+        RaiseException(erCustomError, ExceptionParam);
+    end;
+  end else Session.Abort;
+
+  if FileSystem.GetLastWriteTime(SrvStorage.FolderName + '\' + DavUserFile.Value) &gt; Session.LastSuccessfulStart then
+  begin
+    try
+
+      FileSystem.CopyFile(SrvStorage.FolderName + '\' + DavUserFile.Value, SrvStorage.FolderName + '\' + DavUserFile.Value + '.tmp', true);
+
+      FtpClient := Session.CreateFtpClient;
+      try
+        FtpClient.HostName := FtpStorage.HostName;
+        FtpClient.Port := FtpStorage.Port;
+        FtpClient.PassiveMode := FtpStorage.PassiveMode;
+        FtpClient.TlsMode := FtpStorage.TlsMode; 
+        FtpClient.UserName := FtpStorage.UserName;
+        FtpClient.Password := FtpStorage.Password; 
+        FtpClient.Open;
+        FtpClient.Login;
+        FtpClient.ChangeDirectory(FtpStorage.FolderName);
+        FtpClient.UploadFile(SrvStorage.FolderName + '\' + DavUserFile.Value + '.tmp', DavUserFile.Value);
+        FtpClient.Close;
+      finally
+        FtpClient.Free;
+      end;
+
+      FileSystem.DeleteFile(SrvStorage.FolderName + '\' + DavUserFile.Value + '.tmp', true);
+
+    except
+      if (Session.LastErrorContext = ecFileSystem) and (Session.LastErrorCode = 2) then
+        Session.Abort
+      else
+        RaiseException(erCustomError, ExceptionParam);
+    end;
+  end else Session.Abort;
+	
+end.
+</Script><Parameters><Items><Item Class="String" ID="{0D9A4656-F1F9-4915-AB15-C91312871F12}"><Name>davUserFile</Name><Description>Name der DAVINCI User Datei</Description><Value>daVinci.users</Value></Item><Item Class="String" ID="{8729D01C-6AE7-4674-8796-57AEE39B7748}"><Name>davDataFile</Name><Description>Name der DAVINCI Plandatei</Description><Value>noname.davinci</Value></Item></Items></Parameters><Triggers><Items><Item Class="DailyTrigger" ID="{D2397000-D1E6-45E1-B109-3E35F6F2A15C}"><Enabled>0</Enabled><StartTimePoint>2017-01-01</StartTimePoint><Repetition>1</Repetition><RepetitionInterval>10000</RepetitionInterval><RepetitionDuration>86400000</RepetitionDuration></Item></Items></Triggers></Storage>
