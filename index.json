@@ -1,7 +1,7 @@
 ﻿[
 	{
 		"name": "davinci-to-ftp",
-		"version": "0.0.1",
+		"version": "0.0.2",
 		"description": "Kopiert bei Veränderung eine DAVINCI-Plandatei sowie die DAVINCI-Benutzerdatei in ein FTP-Verzeichnis",
 		"archive": "davinci-to-ftp.cswx",
 		"author": "STÜBER SYSTEMS"

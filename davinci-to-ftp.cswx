@@ -1,13 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?><Storage><Version>1</Version><Description>Kopiert bei Veränderung eine DAVINCI-Plandatei sowie die DAVINCI-Benutzerdatei in ein FTP-Verzeichnis</Description><Notes>*** WICHTIG ***
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Storage>
+  <Version>1</Version>
+  <Description>Kopiert bei Veränderung eine DAVINCI-Plandatei sowie die DAVINCI-Benutzerdatei in ein FTP-Verzeichnis</Description>
+  <Notes>*** WICHTIG ***
 
-Sie müssen den Arbeitsbereich Ihres DAVINCI SERVER sowie die FTP-Verbindung unter "Ordner" definieren. Der Name für den Arbeitsberich muss "davinci-srv" lauten, der Name für die FTP-Verbidnung "davinci-ftp".</Notes><Script>var
-  FtpClient: TFtpClient;
+Sie müssen den Arbeitsbereich Ihres DAVINCI SERVER sowie die FTP-Verbindung unter "Ordner" definieren. Der Name für den Arbeitsberich muss "davinci-srv" lauten, der Name für die FTP-Verbidnung "davinci-ftp".</Notes>
+  <Script>var
+  NoAction: Boolean;
+	FtpClient: TFtpClient;
 	FtpStorage: TFtpStorage;
 	SrvStorage: TLocalStorage;
 	DavDataFile: TStringParameter;
 	DavUserFile: TStringParameter;
 begin
 
+	NoAction := true;
+	
 	DavDataFile := Session.Parameters.ItemsByName['davDataFile'] as TStringParameter;
 	DavUserFile := Session.Parameters.ItemsByName['davUserFile'] as TStringParameter;
 
@@ -39,13 +47,13 @@ begin
 
       FileSystem.DeleteFile(SrvStorage.FolderName + '\' + DavDataFile.Value + '.tmp', true);
 
+			NoAction := false;
+
     except
-      if (Session.LastErrorContext = ecFileSystem) and (Session.LastErrorCode = 2) then
-        Session.Abort
-      else
+      if not ((Session.LastErrorContext = ecFileSystem) and (Session.LastErrorCode = 2)) then
         RaiseException(erCustomError, ExceptionParam);
-    end;
-  end else Session.Abort;
+		end;		
+  end;
 
   if FileSystem.GetLastWriteTime(SrvStorage.FolderName + '\' + DavUserFile.Value) &gt; Session.LastSuccessfulStart then
   begin
@@ -71,14 +79,41 @@ begin
       end;
 
       FileSystem.DeleteFile(SrvStorage.FolderName + '\' + DavUserFile.Value + '.tmp', true);
+			
+			NoAction := false;
 
     except
-      if (Session.LastErrorContext = ecFileSystem) and (Session.LastErrorCode = 2) then
-        Session.Abort
-      else
+      if not ((Session.LastErrorContext = ecFileSystem) and (Session.LastErrorCode = 2)) then
         RaiseException(erCustomError, ExceptionParam);
     end;
-  end else Session.Abort;
+  end;
 	
-end.
-</Script><Parameters><Items><Item Class="String" ID="{0D9A4656-F1F9-4915-AB15-C91312871F12}"><Name>davUserFile</Name><Description>Name der DAVINCI User Datei</Description><Value>daVinci.users</Value></Item><Item Class="String" ID="{8729D01C-6AE7-4674-8796-57AEE39B7748}"><Name>davDataFile</Name><Description>Name der DAVINCI Plandatei</Description><Value>noname.davinci</Value></Item></Items></Parameters><Triggers><Items><Item Class="DailyTrigger" ID="{D2397000-D1E6-45E1-B109-3E35F6F2A15C}"><Enabled>0</Enabled><StartTimePoint>2017-01-01</StartTimePoint><Repetition>1</Repetition><RepetitionInterval>10000</RepetitionInterval><RepetitionDuration>86400000</RepetitionDuration></Item></Items></Triggers></Storage>
+	if NoAction then Session.Abort;
+	
+end.</Script>
+  <Parameters>
+    <Items>
+      <Item Class="String" ID="{0EDE2F55-4227-4671-A869-A6FCE9C88DB4}">
+        <Name>davUserFile</Name>
+        <Description>Name der DAVINCI User Datei</Description>
+        <Value>daVinci.users</Value>
+      </Item>
+      <Item Class="String" ID="{8798995E-E6B0-4603-9CBC-A35EF402E260}">
+        <Name>davDataFile</Name>
+        <Description>Name der DAVINCI Plandatei</Description>
+        <Value>noname.davinci</Value>
+      </Item>
+    </Items>
+  </Parameters>
+  <Triggers>
+    <Items>
+      <Item Class="DailyTrigger" ID="{18734B1A-3673-43E8-A6C9-D5013E86C2AA}">
+        <Enabled>0</Enabled>
+        <StartTimePoint>2018-01-01</StartTimePoint>
+        <Repetition>1</Repetition>
+        <RepetitionInterval>10000</RepetitionInterval>
+        <RepetitionDuration>86400000</RepetitionDuration>
+      </Item>
+    </Items>
+  </Triggers>
+</Storage>
